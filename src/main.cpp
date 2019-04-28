@@ -8,11 +8,16 @@
 
 const char *ssid = "Long LED"; // The name of the Wi-Fi network that will be created
 const char *password = "";   // The password required to connect to it, leave blank for an open network
-int strip_mode = 1;
-short int red = 140;
-short int green = 20;
-short int blue = 255;
-short int brightness = 0;
+int strip_mode = 2;
+short int red = 80;
+short int green = 40;
+short int blue = 225;
+short int brightness = 6;
+int cooling = 55, sparkling = 120, fire_delay = 15;
+int rainbow_speeddelay = 20;
+int run_lights_wavedelay = 50;
+int sparkle_speeddelay = 0;
+int colorwipe_speed = 50;
 
 ESP8266WebServer server(80);
 
@@ -33,7 +38,45 @@ void mode_10();
 void main_page();
 void leds_on();
 
+String html_base() {
+    String page = String("<html>") + 
+        "<head> <title>Led Controll</title>" +
+        "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
+        "<style> *{font-size: 1.15em; font-family: sans-serif;}"+
+        "a { display: block; margin: 10px auto; padding: 10px 15px; text-decoration: none;"+
+        "background-color: #2c6dd6; color: #eaeaea; text-align: center; border-radius: 4px;}" + 
+        "p { padding-left: 10px; border-left: 6px solid blue; border-radius: 5px;"+
+        "color: #222;}" +
+        "input[type=\"submit\"] {display: block; margin: 10px auto; background-color: 2c6dd6;" +
+        "color: #eaeaea; text-align: center; width: 12em;  height: 4em; border-radius: 5px;}" + 
+        "input[type=\"text\"] {border: 2px solid #2c6dd6; border-radius: 4px; margin-left: 10px}" +
+        "</style>" + 
+        "</head>";
+    return page;
+}
 
+String html_main() {
+    String page = String("<body>") + 
+        "<a href=\"/turnoff\">Turn off</a>" + 
+        "<a href=\"/whole\">Whole color</a>" + 
+        "<a href=\"/meteor\">Meteor to Earth</a>" +
+		"<a href=\"/cyclon\">Cyclon</a>" +
+		// "<a href=\"/balls\">Balls, My Balls</a>" +
+		"<a href=\"/fire\">Fire or IGNITE ME</a>" +
+		"<a href=\"/rainbow\">Rainbowshit</a>" +
+		"<a href=\"/twinkle\">Twinkle</a>" +
+		"<a href=\"/runninglights\">Run The Light</a>" +
+		"<a href=\"/sparkle\">Sparkles MAAAN</a>" +
+		"<a href=\"/wipe\">Wipe your life</a>" +
+        "<form action=\"/\" method=\"GET\">" +
+        "<p><label>Brightness<input type=\"text\" name=\"brightness\" value=\"" + String(brightness) + "\" style=\"max-width: 300px;\"></label></p>" +
+        "<p><label>R<input type=\"text\" name=\"red\" value=\"" + String(red) + "\" style=\"max-width: 300px;\"></label></p>" +
+        "<p><label>G<input type=\"text\"name=\"green\" value=\"" + String(green) + "\" style=\"max-width: 300px;\"></label></p>" +
+        "<p><label>B<input type=\"text\" name=\"blue\" value=\"" + String(blue) + "\" style=\"max-width: 300px;\"></label></p>" +
+        "<input type=\"submit\" value=\"Send\">"
+        "</body>" ;
+    return page;
+}
 
 void setup() {
   FastLED.addLeds<WS2811, PIN, GRB>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
@@ -65,44 +108,7 @@ void setup() {
   Serial.println("Server started");
 }
 
-String html_base() {
-    String page = String("<html>") + 
-        "<head> <title>Led Controll</title>" +
-        "<style> *{font-size: 1.15em; font-family: sans-serif;}"+
-        "a { display: block; margin: 10px auto; padding: 10px 15px; text-decoration: none;"+
-        "background-color: #2c6dd6; color: #eaeaea; text-align: center;}" + 
-        "p { padding-left: 10px; border-left: 6px solid blue; border-radius: 5px;"+
-        "color: #222;}" +
-        "input[type=\"submit\"] {display: block; margin: 10px auto; background-color: 2c6dd6;" +
-        "color: #eaeaea; text-align: center; width: 12em;  height: 4em;}" + 
-        "input[type=\"text\"] {border: 2px solid #2c6dd6; border-radius: 4px; margin-left: 10px}" +
-        "</style>" + 
-        "</head>";
-    return page;
-}
 
-String html_main() {
-    String page = String("<body>") + 
-        "<a href=\"/turnoff\">Turn off</a>" + 
-        "<a href=\"/whole\">Whole color</a>" + 
-        "<a href=\"/meteor\">Meteor to Earth</a>" +
-		"<a href=\"/cyclon\">Cyclon</a>" +
-		// "<a href=\"/balls\">Balls, My Balls</a>" +
-		"<a href=\"/fire\">Fire or IGNITE ME</a>" +
-		"<a href=\"/rainbow\">Rainbowshit</a>" +
-		"<a href=\"/twinkle\">Twinkle</a>" +
-		"<a href=\"/runninglights\">Run The Light</a>" +
-		"<a href=\"/sparkle\">Sparkles MAAAN</a>" +
-		"<a href=\"/wipe\">Wipe your life</a>" +
-        "<form action=\"/\" method=\"GET\">" +
-        "<p><label>Brightness<input type=\"text\" name=\"brightness\" value=\"" + String(brightness) + "\" style=\"max-width: 300px;\"></label></p>" +
-        "<p><label>R<input type=\"text\" name=\"red\" value=\"" + String(red) + "\" style=\"max-width: 300px;\"></label></p>" +
-        "<p><label>G<input type=\"text\"name=\"green\" value=\"" + String(green) + "\" style=\"max-width: 300px;\"></label></p>" +
-        "<p><label>B<input type=\"text\" name=\"blue\" value=\"" + String(blue) + "\" style=\"max-width: 300px;\"></label></p>" +
-        "<input type=\"submit\" value=\"Send\">"
-        "</body>" ;
-    return page;
-}
 
 void redirect_to_main() {
     String page = String("<head>") +
@@ -172,10 +178,17 @@ void mode_9() {
     Serial.println("() Sparkle mode");
 }
 void mode_10() {
+  if (server.args() > 0)
+  {
+
+  }
+  else
+  {
     strip_mode = 10;
     String page = html_base() + "<p>I will wipe you!</p><br><a href=\"/\">Main</a> ";
     server.send(200, "text/html", page);
-    Serial.println("() Wipe mode");
+    Serial.println("() Wipe mode"); 
+  }
 }
 
 void main_page() {
@@ -233,7 +246,7 @@ void leds_on() {
             break;
         }
         case 2: {
-            meteorRain(red, green, blue, 1, 32, true, 60);
+            meteorRain(red, green, blue, 5, 48, true, 45);
             break;
         }
         case 3: {
@@ -245,28 +258,28 @@ void leds_on() {
             break;
         }
         case 5: {
-            Fire(55,120,15);
+            Fire(cooling, sparkling, fire_delay);
             break;
         }
         case 6: {
-            rainbowCycle(20);
+            rainbowCycle(rainbow_speeddelay);
             break;
         }
         case 7: {
-            TwinkleRandom(20, 100, false);
+            TwinkleRandom(200, 70, false);
             break;
         }
         case 8: {
-            RunningLights(red,green,blue, 50);
+            RunningLights(red,green,blue, run_lights_wavedelay);
             break;
         }
         case 9: {
-            Sparkle(red, green, blue, 0);
+            Sparkle(red, green, blue, sparkle_speeddelay);
             break;
         }
         case 10: {
-            colorWipe(red, green, blue, 50);
-            colorWipe(0x00,0x00,0x00, 50);
+            colorWipe(red, green, blue, colorwipe_speed);
+            colorWipe(0x00,0x00,0x00, colorwipe_speed);
             break;
         }
         

@@ -241,7 +241,7 @@ void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, i
 void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int SpeedDelay) {  
     setAll(0,0,0);
   
-    for(int i = 0; i < NUM_LEDS+NUM_LEDS; i++) {
+    for(int i = 0; i < NUM_LEDS; i++) {
     
     
         // fade brightness all LEDs one step
