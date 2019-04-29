@@ -1,6 +1,6 @@
 #define FASTLED_ESP8266_RAW_PIN_ORDER
 #include "FastLED.h"
-#define NUM_LEDS 130 
+#define NUM_LEDS 131
 CRGB leds[NUM_LEDS];
 #define PIN D8
 
@@ -39,7 +39,7 @@ void Sparkle(byte red, byte green, byte blue, int SpeedDelay) {
 void RunningLights(byte red, byte green, byte blue, int WaveDelay) {
   int Position=0;
   
-  for(int i=0; i<NUM_LEDS*2; i++)
+  for(int i=0; i<NUM_LEDS/20; i++)
   {
       Position++; // = 0; //Position + Rate;
       for(int i=0; i<NUM_LEDS; i++) {
@@ -76,7 +76,7 @@ void rainbowCycle(int SpeedDelay) {
   byte *c;
   uint16_t i, j;
 
-  for(j=0; j<256; j++) { // 5 cycles of all colors on wheel
+  for(j=0; j<256; j++) { // 1 cycles of all colors on wheel
     for(i=0; i< NUM_LEDS; i++) {
       c=Wheel(((i * 256 / NUM_LEDS) + j) & 255);
       setPixel(i, *c, *(c+1), *(c+2));
@@ -239,27 +239,27 @@ void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, i
 }
 
 void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int SpeedDelay) {  
-    setAll(0,0,0);
+  setAll(0,0,0);
+
+  for(int i = 0; i < NUM_LEDS; i++) {
   
-    for(int i = 0; i < NUM_LEDS; i++) {
-    
-    
-        // fade brightness all LEDs one step
-        for(int j=0; j<NUM_LEDS; j++) {
-            if( (!meteorRandomDecay) || (random(10)>5) ) {
-                fadeToBlack(j, meteorTrailDecay );        
-            }
-        }
-    
-        // draw meteor
-        for(int j = 0; j < meteorSize; j++) {
-            if( ( i-j <NUM_LEDS) && (i-j>=0) ) {
-                setPixel(i-j, red, green, blue);
-            } 
-        }
-   
-        showStrip();
-        delay(SpeedDelay);
+  
+    // fade brightness all LEDs one step
+    for(int j=0; j<NUM_LEDS; j++) {
+      if( (!meteorRandomDecay) || (random(10)>5) ) {
+        fadeToBlack(j, meteorTrailDecay );        
+      }
+    }
+
+    // draw meteor
+    for(int j = 0; j < meteorSize; j++) {
+      if( ( i-j <NUM_LEDS) && (i-j>=0) ) {
+        setPixel(i-j, red, green, blue);
+      } 
+    }
+
+    showStrip();
+    delay(SpeedDelay);
   }
 }
 

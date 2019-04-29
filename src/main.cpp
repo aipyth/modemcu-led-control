@@ -8,11 +8,11 @@
 
 const char *ssid = "Long LED"; // The name of the Wi-Fi network that will be created
 const char *password = "";   // The password required to connect to it, leave blank for an open network
-int strip_mode = 2;
+int strip_mode = 0;
 short int red = 80;
 short int green = 40;
 short int blue = 225;
-short int brightness = 6;
+short int brightness = 50;
 int cooling = 55, sparkling = 120, fire_delay = 15;
 int rainbow_speeddelay = 20;
 int run_lights_wavedelay = 50;
@@ -48,8 +48,9 @@ String html_base() {
         "p { padding-left: 10px; border-left: 6px solid blue; border-radius: 5px;"+
         "color: #222;}" +
         "input[type=\"submit\"] {display: block; margin: 10px auto; background-color: 2c6dd6;" +
-        "color: #eaeaea; text-align: center; width: 12em;  height: 4em; border-radius: 5px;}" + 
+        "color: #eaeaea; text-align: center; width: 100%;  height: 2em; border-radius: 5px; border-width: 0;}" +  
         "input[type=\"text\"] {border: 2px solid #2c6dd6; border-radius: 4px; margin-left: 10px}" +
+        "input[type=range] {height: 21px; -webkit-appearance: none; margin: 10px 0; width: 100%;} input[type=range]:focus {outline: none;} input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px cursor: pointer; animate: 0.2s; box-shadow: 0px 0px 0px #000000;background: #2C6DD6; border-radius: 15px; border: 1px solid #000000;} input[type=range]::-webkit-slider-thumb {box-shadow: 0px 0px 10px #000000;border: 0px solid #000000; height: 15px; width: 15px; border-radius: 10px;background: #FFFFFF; cursor: pointer; -webkit-appearance: none; margin-top: -4px;} input[type=range]:focus::-webkit-slider-runnable-track {background: #2C6DD6;} input[type=range]::-moz-range-track {width: 100%;height: 8px; cursor: pointer; animate: 0.2s; box-shadow: 0px 0px 0px #000000; background: #2C6DD6; border-radius: 15px; border: 1px solid #000000;} input[type=range]::-moz-range-thumb {box-shadow: 0px 0px 10px #000000; border: 0px solid #000000; height: 15px; width: 15px; border-radius: 10px; background: #FFFFFF; cursor: pointer;} input[type=range]::-ms-track {width: 100%; height: 8px; cursor: pointer;animate: 0.2s; background: transparent;border-color: transparent;color: transparent;} input[type=range]::-ms-fill-lower {background: #2C6DD6;border: 1px solid #000000;border-radius: 30px;box-shadow: 0px 0px 0px #000000;} input[type=range]::-ms-fill-upper {background: #2C6DD6;border: 1px solid #000000;border-radius: 30px;box-shadow: 0px 0px 0px #000000;}input[type=range]::-ms-thumb {margin-top: 1px;box-shadow: 0px 0px 10px;#000000;border: 0px solid #000000;height: 15px;width: 15px;border-radius: 10px;background: #FFFFFF;cursor: pointer;}input[type=range]:focus::-ms-fill-lower {background: #2C6DD6;}input[type=range]:focus::-ms-fill-upper {background: #2C6DD6;}" +
         "</style>" + 
         "</head>";
     return page;
@@ -70,9 +71,9 @@ String html_main() {
 		"<a href=\"/wipe\">Wipe your life</a>" +
         "<form action=\"/\" method=\"GET\">" +
         "<p><label>Brightness<input type=\"text\" name=\"brightness\" value=\"" + String(brightness) + "\" style=\"max-width: 300px;\"></label></p>" +
-        "<p><label>R<input type=\"text\" name=\"red\" value=\"" + String(red) + "\" style=\"max-width: 300px;\"></label></p>" +
-        "<p><label>G<input type=\"text\"name=\"green\" value=\"" + String(green) + "\" style=\"max-width: 300px;\"></label></p>" +
-        "<p><label>B<input type=\"text\" name=\"blue\" value=\"" + String(blue) + "\" style=\"max-width: 300px;\"></label></p>" +
+        "<p><label>R<input type=\"range\" name=\"red\"  min=\"0\" max=\"255\"  value=\"" + String(red) + "\"></label></p>" +
+        "<p><label>G<input type=\"range\" name=\"green\"  min=\"0\" max=\"255\"  value=\"" + String(green) + "\"></label></p>" +
+        "<p><label>B<input type=\"range\" name=\"blue\"  min=\"0\" max=\"255\"  value=\"" + String(blue) + "\"></label></p>" +
         "<input type=\"submit\" value=\"Send\">"
         "</body>" ;
     return page;
@@ -148,14 +149,52 @@ void mode_4() {
     Serial.println("() BouncingBalls mode");
 }
 void mode_5() {
+    if (server.args() > 0)
+    {
+        for (int i = 0; i < server.args(); i++) {
+            String name = server.argName(i);
+            String value = server.arg(i);
+            if (name == "cooling") {
+                cooling = value.toInt();
+            }
+            if (name == "sparkling") {
+                sparkling = value.toInt();
+            }
+            if (name == "delay") {
+                fire_delay = value.toInt();
+            }
+        } 
+    }
     strip_mode = 5;
-    String page = html_base() + "<p>IGNITE ME!!!</p><br><a href=\"/\">Main</a> ";
+    String page = html_base() + "<p>IGNITE ME!!!</p>" +
+    "<form method=\"GET\" >" +
+    "<p><label>Cooling<input type=\"number\" name=\"cooling\" min=\"0\" value=\"" + cooling + "\"" + "</label></p>" +
+    "<p><label>Sparkling<input type=\"number\" name=\"sparkling\" min=\"0\" value=\"" + sparkling + "\"" + "</label></p>" +
+    "<p><label>Fire Delay<input type=\"number\" name=\"delay\" min=\"0\" value=\"" + fire_delay + "\"" + "</label></p>" +
+    "<input type=\"submit\" value=\"Send\">" +
+    "</form>" +
+    "<br><a href=\"/\">Main</a> ";;
     server.send(200, "text/html", page);
     Serial.println("() Fire mode");
 }
 void mode_6() {
+    if (server.args() > 0)
+    {
+        for (int i = 0; i < server.args(); i++) {
+            String name = server.argName(i);
+            String value = server.arg(i);
+            if (name == "delay") {
+                rainbow_speeddelay = value.toInt();
+            }
+        } 
+    }
     strip_mode = 6;
-    String page = html_base() + "<p>Call in the Rainbow Dash!</p><br><a href=\"/\">Main</a> ";
+    String page = html_base() + "<p>Call in the Rainbow Dash!</p>" +
+    "<form method=\"GET\" >" +
+    "<p><label>Rainbow speed<input type=\"number\" name=\"delay\" min=\"0\" value=\"" + rainbow_speeddelay + "\"" + "</label></p>" +
+    "<input type=\"submit\" value=\"Send\">" +
+    "</form>" +
+    "<br><a href=\"/\">Main</a> ";
     server.send(200, "text/html", page);
     Serial.println("() Rainbow mode");
 }
@@ -166,29 +205,67 @@ void mode_7() {
     Serial.println("() TwinkleRandom mode");
 }
 void mode_8() {
+    if (server.args() > 0)
+    {
+        for (int i = 0; i < server.args(); i++) {
+            String name = server.argName(i);
+            String value = server.arg(i);
+            if (name == "delay") {
+                run_lights_wavedelay = value.toInt();
+            }
+        } 
+    }
     strip_mode = 8;
-    String page = html_base() + "<p>DISCO!!</p><br><a href=\"/\">Main</a> ";
+    String page = html_base() + "<p>DISCO!!</p>" +
+    "<form method=\"GET\" >" +
+    "<p><label>Wave delay<input type=\"number\" name=\"delay\" min=\"0\" value=\"" + run_lights_wavedelay + "\"" + "</label></p>" +
+    "<input type=\"submit\" value=\"Send\">" +
+    "</form>" +
+    "<br><a href=\"/\">Main</a> ";
     server.send(200, "text/html", page);
     Serial.println("() RunningLights mode");
 }
 void mode_9() {
+    if (server.args() > 0)
+    {
+        for (int i = 0; i < server.args(); i++) {
+            String name = server.argName(i);
+            String value = server.arg(i);
+            if (name == "delay") {
+                sparkle_speeddelay = value.toInt();
+            }
+        } 
+    }
     strip_mode = 9;
-    String page = html_base() + "<p>Such a nice sparkles <3</p><br><a href=\"/\">Main</a> ";
+    String page = html_base() + "<p>Such a nice sparkles <3</p>" +
+    "<form method=\"GET\" >" +
+    "<p><label>Sparkle delay<input type=\"number\" name=\"delay\" min=\"0\" value=\"" + sparkle_speeddelay + "\"" + "</label></p>" +
+    "<input type=\"submit\" value=\"Send\">" +
+    "</form>" +
+    "<br><a href=\"/\">Main</a> ";
     server.send(200, "text/html", page);
     Serial.println("() Sparkle mode");
 }
 void mode_10() {
-  if (server.args() > 0)
-  {
-
-  }
-  else
-  {
+    if (server.args() > 0)
+    {
+        for (int i = 0; i < server.args(); i++) {
+            String name = server.argName(i);
+            String value = server.arg(i);
+            if (name == "speed") {
+                colorwipe_speed = value.toInt();
+            }
+        } 
+    }
     strip_mode = 10;
-    String page = html_base() + "<p>I will wipe you!</p><br><a href=\"/\">Main</a> ";
+    String page = html_base() + "<p>I will wipe you!</p>" + 
+    "<form method=\"GET\" >" +
+    "<p><label>Speed<input type=\"number\" name=\"speed\" min=\"0\" value=\"" + colorwipe_speed + "\"" + "</label></p>" +
+    "<input type=\"submit\" value=\"Send\">" +
+    "</form>" +
+    "<br><a href=\"/\">Main</a> ";
     server.send(200, "text/html", page);
     Serial.println("() Wipe mode"); 
-  }
 }
 
 void main_page() {
