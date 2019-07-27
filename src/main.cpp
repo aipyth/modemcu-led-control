@@ -6,8 +6,8 @@
 
 #include "effects.cpp"
 
-const char *ssid = "Long LED"; // The name of the Wi-Fi network that will be created
-const char *password = "";   // The password required to connect to it, leave blank for an open network
+const char *ssid = "Test LED"; // The name of the Wi-Fi network that will be created
+const char *password = "thereisnospoontest";   // The password required to connect to it, leave blank for an open network
 int strip_mode = 0;
 short int red = 80;
 short int green = 40;
@@ -16,6 +16,7 @@ short int brightness = 50;
 int cooling = 55, sparkling = 120, fire_delay = 15;
 int rainbow_speeddelay = 20;
 int run_lights_wavedelay = 50;
+int run_lights_wavelength = 3;
 int sparkle_speeddelay = 0;
 int colorwipe_speed = 50;
 
@@ -99,6 +100,7 @@ void setup() {
   server.on("/whole", mode_1);
   server.on("/meteor", mode_2);
   server.on("/cyclon", mode_3);
+  // mode_4 switched off due to some errors in code
   // server.on("/balls", mode_4);
   server.on("/fire", mode_5);
   server.on("/rainbow", mode_6);
@@ -210,15 +212,17 @@ void mode_8() {
         for (int i = 0; i < server.args(); i++) {
             String name = server.argName(i);
             String value = server.arg(i);
-            if (name == "delay") {
+            if (name == "delay")
                 run_lights_wavedelay = value.toInt();
-            }
+            if (name == "length")
+                run_lights_wavelength = value.toInt();
         } 
     }
     strip_mode = 8;
     String page = html_base() + "<p>DISCO!!</p>" +
     "<form method=\"GET\" >" +
     "<p><label>Wave delay<input type=\"number\" name=\"delay\" min=\"0\" value=\"" + run_lights_wavedelay + "\"" + "</label></p>" +
+    "<p><label>Wave length<input type=\"number\" name=\"length\" min=\"1\" value=\"" + run_lights_wavelength + "\"" + "</label></p>" +
     "<input type=\"submit\" value=\"Send\">" +
     "</form>" +
     "<br><a href=\"/\">Main</a> ";
@@ -311,7 +315,6 @@ void loop() {
 }
 
 // LEDS NOW
-
 void leds_on() {
     switch (strip_mode){
         case 0: {
@@ -347,7 +350,7 @@ void leds_on() {
             break;
         }
         case 8: {
-            RunningLights(red,green,blue, run_lights_wavedelay);
+            RunningLights(red, green, blue, run_lights_wavedelay, run_lights_wavelength);
             break;
         }
         case 9: {

@@ -1,7 +1,9 @@
 #define FASTLED_ESP8266_RAW_PIN_ORDER
 #include "FastLED.h"
-#define NUM_LEDS 131
+// Paste number of leds here
+#define NUM_LEDS 25
 CRGB leds[NUM_LEDS];
+// And here is the output pin
 #define PIN D8
 
 void colorWipe(byte red, byte green, byte blue, int SpeedDelay);
@@ -30,55 +32,49 @@ void colorWipe(byte red, byte green, byte blue, int SpeedDelay) {
 
 void Sparkle(byte red, byte green, byte blue, int SpeedDelay) {
   int Pixel = random(NUM_LEDS);
-  setPixel(Pixel,red,green,blue);
+  setPixel(Pixel, red, green, blue);
   showStrip();
   delay(SpeedDelay);
-  setPixel(Pixel,0,0,0);
+  setPixel(Pixel, 0, 0, 0);
 }
 
-void RunningLights(byte red, byte green, byte blue, int WaveDelay) {
-  int Position=0;
-  
-  for(int i=0; i<NUM_LEDS/20; i++)
+void RunningLights(byte red, byte green, byte blue, int waveDelay, int waveLength) {  
+  for (int position = 0; position < waveLength; position++)
   {
-      Position++; // = 0; //Position + Rate;
-      for(int i=0; i<NUM_LEDS; i++) {
-        // sine wave, 3 offset waves make a rainbow!
-        //float level = sin(i+Position) * 127 + 128;
-        //setPixel(i,level,0,0);
-        //float level = sin(i+Position) * 127 + 128;
-        setPixel(i,((sin(i+Position) * 127 + 128)/255)*red,
-                   ((sin(i+Position) * 127 + 128)/255)*green,
-                   ((sin(i+Position) * 127 + 128)/255)*blue);
+      for(int led = 0; led < NUM_LEDS; led++) {
+        int power = (3.14 / waveLength) * sin(led+position);
+        setPixel(led, power * red,
+                    power * green,
+                    power * blue);
       }
       
       showStrip();
-      delay(WaveDelay);
+      delay(waveDelay);
   }
 }
 
 void TwinkleRandom(int Count, int SpeedDelay, boolean OnlyOne) {
   setAll(0,0,0);
   
-  for (int i=0; i<Count; i++) {
-     setPixel(random(NUM_LEDS),random(0,255),random(0,255),random(0,255));
+  for (int i = 0; i < Count; i++) {
+     setPixel(random(NUM_LEDS), random(0,255), random(0,255), random(0,255));
      showStrip();
+
      delay(SpeedDelay);
      if(OnlyOne) { 
-       setAll(0,0,0); 
+       setAll(0, 0, 0); 
      }
    }
-  
-  delay(SpeedDelay);
+  // delay(SpeedDelay);
 }
 
 void rainbowCycle(int SpeedDelay) {
   byte *c;
   uint16_t i, j;
 
-  for(j=0; j<256; j++) { // 1 cycles of all colors on wheel
-    for(i=0; i< NUM_LEDS; i++) {
-      c=Wheel(((i * 256 / NUM_LEDS) + j) & 255);
+  for(j = 0; j < 256; j++) { // 1 cycles of all colors on wheel
+    for(i = 0; i < NUM_LEDS; i++) {
+      c = Wheel( ((i * 256 / NUM_LEDS) + j) & 255 );
       setPixel(i, *c, *(c+1), *(c+2));
     }
     showStrip();
@@ -90,19 +86,19 @@ byte * Wheel(byte WheelPos) {
   static byte c[3];
   
   if(WheelPos < 85) {
-   c[0]=WheelPos * 3;
-   c[1]=255 - WheelPos * 3;
-   c[2]=0;
+    c[0] = WheelPos * 3;
+    c[1] = 255 - WheelPos * 3;
+    c[2] = 0;
   } else if(WheelPos < 170) {
-   WheelPos -= 85;
-   c[0]=255 - WheelPos * 3;
-   c[1]=0;
-   c[2]=WheelPos * 3;
+    WheelPos -= 85;
+    c[0] = 255 - WheelPos * 3;
+    c[1] = 0;
+    c[2] = WheelPos * 3;
   } else {
-   WheelPos -= 170;
-   c[0]=0;
-   c[1]=WheelPos * 3;
-   c[2]=255 - WheelPos * 3;
+    WheelPos -= 170;
+    c[0] = 0;
+    c[1] = WheelPos * 3;
+    c[2] = 255 - WheelPos * 3;
   }
 
   return c;
