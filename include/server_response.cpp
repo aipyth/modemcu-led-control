@@ -118,8 +118,9 @@ String base() {
 String main_page(byte brightness, byte red, byte green, byte blue) {
     String page = String("") + 
         "<body>" +
-            "<a href=\"/turnoff\">Turn off</a>" + 
-            "<a href=\"/whole\">Whole color</a>" + 
+            "<a href=\"/turnoff/\">Turn off</a>" + 
+            "<a href=\"/whole/\">Whole color</a>" + 
+            "<a href=\"/comets/\">Comets</a>" + 
             // "<a href=\"/meteor\">Meteor to Earth</a>" +
             // "<a href=\"/cyclon\">Cyclon</a>" +
             // // "<a href=\"/balls\">Balls, My Balls</a>" +
