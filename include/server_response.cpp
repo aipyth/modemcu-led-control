@@ -1,4 +1,4 @@
-#include <Arduino.h>
+ #include <Arduino.h>
 
 String base() {
     String page = String("<html>") + 
@@ -115,17 +115,17 @@ String base() {
     return page;
 }
 
-String main_page(byte brightness, byte red, byte green, byte blue) {
+String main_page(byte brightness, byte colorsheme, int mass, byte red, byte green, byte blue, byte hue, byte saturation, byte value) {
     String page = String("") + 
         "<body>" +
             "<a href=\"/turnoff/\">Turn off</a>" + 
             "<a href=\"/whole/\">Whole color</a>" + 
+            "<a href=\"/rainbow/\">Rainbowshit</a>" +
             "<a href=\"/comets/\">Comets</a>" + 
             // "<a href=\"/meteor\">Meteor to Earth</a>" +
             // "<a href=\"/cyclon\">Cyclon</a>" +
             // // "<a href=\"/balls\">Balls, My Balls</a>" +
             // "<a href=\"/fire\">Fire or IGNITE ME</a>" +
-            // "<a href=\"/rainbow\">Rainbowshit</a>" +
             // "<a href=\"/twinkle\">Twinkle</a>" +
             // "<a href=\"/runninglights\">Run The Light</a>" +
             // "<a href=\"/sparkle\">Sparkles MAAAN</a>" +
@@ -134,12 +134,30 @@ String main_page(byte brightness, byte red, byte green, byte blue) {
             "<form action=\"/\" method=\"GET\">" +
                 "<p>" +
                     "<label for=\"brightness\">Brightness</label>" +
-                    "<input type=\"text\"" +
+                    "<input type=\"number\"" +
                         "id=\"brightness\"" +
                         "name=\"brightness\"" +
                         "value=\"" + String(brightness) + "\" " +
                         "style=\"{max-width: 300px;}\">" +
                 "</p>" +
+                "<hr>" +
+                "<p>" +
+                    "<label for=\"mass\">Mass</label>" +
+                    "<input type=\"number\"" +
+                        "id=\"mass\"" +
+                        "name=\"mass\"" +
+                        "value=\"" + String(mass) + "\" " +
+                        "style=\"{max-width: 300px;}\">" +
+                "</p>" +
+                "<hr>" +
+                "<p>" +
+                    "<label for=\"colorsheme\">Colorsheme</label>" +
+                    "<select id=\"colorsheme\" name=\"colorsheme\">" +
+                        "<option " + ( (colorsheme == 0) ? "selected" : "" ) + " value=\"0\">RGB</option>" +
+                        "<option " + ( (colorsheme == 1) ? "selected" : "" ) + " value=\"1\">HSV</option>" +
+                    "</select>" +
+                "</p>" +
+                "<hr>" +
                 "<p>" +
                     "<label for=\"red\">R</label>" +
                     "<input type=\"range\"" +
@@ -167,8 +185,46 @@ String main_page(byte brightness, byte red, byte green, byte blue) {
                         "max=\"255\"" +
                         "value=\"" + String(blue) + "\">" +
                 "</p>" +
+                "<hr>" +
+                "<p>" +
+                    "<label for=\"hue\">Hue</label>" +
+                    "<input type=\"range\"" +
+                        "id=\"hue\"" +
+                        "name=\"hue\"" +
+                        "min=\"0\"" +
+                        "max=\"255\"" +
+                        "value=\"" + String(hue) + "\">" +
+                "</p>" +
+                "<p>" +
+                    "<label for=\"saturation\">Saturation</label>" +
+                    "<input type=\"range\"" +
+                        "id=\"saturation\"" +
+                        "name=\"saturation\"" +
+                        "min=\"0\"" +
+                        "max=\"255\"" +
+                        "value=\"" + String(saturation) + "\">" +
+                "</p>" +
+                "<p>" +
+                    "<label for=\"value\">Value</label>" +
+                    "<input type=\"range\"" +
+                        "id=\"value\"" +
+                        "name=\"value\"" +
+                        "min=\"0\"" +
+                        "max=\"255\"" +
+                        "value=\"" + String(value) + "\">" +
+                "</p>" +
+                "<hr>" +
                 "<input type=\"submit\" value=\"Send\">" +
             "</form>" +
         "</body>" ;
     return base() + page;
+}
+
+String redirect_to_main(String address) {
+    String data = String("<html>") +
+        "<head>" +
+            "<meta http-equiv=\"refresh\" content=\"0; url=http://" + address + "\">" +
+        "</head>" +
+        "</html>";
+    return data;
 }

@@ -3,17 +3,25 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ArduinoOTA.h>
-
+// #include <ArduinoJson.h>
 
 // Custom includes
 #include "server_response.cpp"
 #include "effects.cpp"
+#include "api.cpp"
 
 
 // LED settings
-byte brightness = 50;
-byte red = 30, green = 0, blue = 255;
-byte effect = 0;
+int effect = 0;
+
+// extern byte brightness;
+// extern byte colorsheme;
+
+// extern RGBScheme rgb_scheme;
+// extern HSVScheme hsv_scheme;
+
+// extern int mass;
+// extern int comets_length;
 
 // WiFi settings
 const char ssid[] = "TPL";
@@ -33,8 +41,9 @@ void startArduinoOTA();
 void runFuckingLights();
 void handleRoot();
 void handleTurnOff();
-void handleComets();
+void handleRainbow();
 void handleWholeColor();
+void handleComets();
 
 
 // Run on setup/load
@@ -54,6 +63,7 @@ void setup() {
       Serial.println();
       Serial.print("Cannot connect to the ");
       Serial.println(ssid);
+      startSoftAP();
       while (true) {;}
     }
   }
@@ -66,11 +76,20 @@ void setup() {
   }
 
 
+  // Handle standart http requests
   server.on("/", handleRoot);
   server.on("/turnoff/", handleTurnOff);
   server.on("/whole/", handleWholeColor);
+  server.on("/rainbow/", handleRainbow);
   server.on("/comets/", handleComets);
 
+  // Handle API requests
+  server.on("/api/", handleAPIRoot);
+  server.on("/api/basic/", handleAPIBasic);
+  server.on("/api/setrgb/", handleSetRGB);
+  server.on("/api/sethsv/", handleSetHSV);
+
+  // Start server
   server.begin();
   Serial.println("HTTP server started");
 
@@ -140,7 +159,12 @@ void runFuckingLights() {
       break;
     }
     case 2: {
+      rainbow();
+      break;
+    }
+    case 3: {
       comets();
+      break;
     }
   }
 }
@@ -148,21 +172,68 @@ void runFuckingLights() {
 
 // Handle main page /
 void handleRoot() {
-  server.send(200, "text/html", main_page(brightness, red, green, blue));
+  if (server.args() > 0) {
+    String message = String();
+
+    for (int i = 0; i < server.args(); i++) {
+      String name = server.argName(i);
+      String value = server.arg(i);
+
+      message += "Arg nº" + (String)i + " –> ";
+      message += name + ": ";
+      message += value + "\n";
+      Serial.println(message);
+
+      if (name == "brightness") {
+        brightness = value.toInt();
+        updateBrightness();
+      }
+      if (name == "mass") {
+        mass = value.toInt();
+      }
+      if (name == "colorsheme") {
+        colorsheme = value.toInt();
+      }
+      if (name == "red") {
+        rgb_scheme.red = value.toInt();
+      } 
+      if (name == "green") {
+        rgb_scheme.green = value.toInt();
+      }
+      if (name == "blue") {
+        rgb_scheme.blue = value.toInt();
+      }
+      if (name == "hue") {
+        hsv_scheme.hue = value.toInt();
+      }
+      if (name == "saturation") {
+        hsv_scheme.saturation = value.toInt();
+      }
+      if (name == "value") {
+        hsv_scheme.value = value.toInt();
+      }
+    }
+  }
+  server.send(200, "text/html", main_page(brightness, colorsheme, mass, rgb_scheme.red, rgb_scheme.green, rgb_scheme.blue, hsv_scheme.hue, hsv_scheme.saturation, hsv_scheme.value));
 }
 
 // Handle effects
 void handleTurnOff() {
   effect = 0;
-  server.send(200, "text/html", base() + "<body><a href=\"/\">Come back</a></body>");
+  server.send(200, "text/html", redirect_to_main( WiFi.localIP().toString() ));
 }
 
 void handleWholeColor() {
   effect = 1;
-  server.send(200, "text/html", base() + "<body><a href=\"/\">Come back</a></body>");
+  server.send(200, "text/html", redirect_to_main( WiFi.localIP().toString() ));
+}
+
+void handleRainbow() {
+  effect = 2;
+  server.send(200, "text/html", redirect_to_main( WiFi.localIP().toString() ));
 }
 
 void handleComets() {
-  effect = 2;
-  server.send(200, "text/html", base() + "<body><a href=\"/\">Come back</a></body>");
+  effect = 3;
+  server.send(200, "text/html", redirect_to_main( WiFi.localIP().toString() ));
 }
