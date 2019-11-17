@@ -17,6 +17,8 @@ extern HSVScheme hsv_scheme;
 
 extern int mass;
 extern int comets_length;
+extern int fire_cooling;
+extern int fire_sparking;
 
 
 template <typename C>
@@ -47,13 +49,15 @@ void handleAPIBasic() {
             "scheme":          0-1,
             "mass":            0-16192,
             "comets_length":   0-(NUM_LEDS / 2),
-            "effect":          0-(number of effects)
+            "effect":          0-(number of effects),
+            "fire_cooling":    0-16192,
+            "fire_sparking":   0-16192,
         }
     */
     if (server.hasArg("plain")) {
         String raw_json = server.arg("plain");
         // Serial.println(raw_json);
-        const int BUFFER_SIZE = JSON_OBJECT_SIZE(5) + 64;
+        const int BUFFER_SIZE = JSON_OBJECT_SIZE(10) + 64;
         DynamicJsonDocument doc(BUFFER_SIZE);
         // DynamicJsonBuffer doc;
         DeserializationError err = deserializeJson(doc, raw_json);
@@ -63,7 +67,7 @@ void handleAPIBasic() {
             Serial.println(err.c_str());
 
             // Serial.println("Error deserializing json data");
-            server.send(505, "text/plain", "Deserialization error");
+            server.send(503, "text/plain", "Deserialization error");
             return;
         }
 
@@ -78,6 +82,10 @@ void handleAPIBasic() {
         update_key_if_exists<int>(doc, "comets_length", comets_length);
         // effect
         update_key_if_exists<int>(doc, "effect", effect);
+        // fire cooling
+        update_key_if_exists<int>(doc, "fire_cooling", fire_cooling);
+        // fire_sparking
+        update_key_if_exists<int>(doc, "fire_sparking", fire_sparking);
 
 
 

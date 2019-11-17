@@ -115,13 +115,14 @@ String base() {
     return page;
 }
 
-String main_page(byte brightness, byte colorsheme, int mass, byte red, byte green, byte blue, byte hue, byte saturation, byte value) {
+String main_page(byte brightness, byte colorsheme, int mass, int comets_length, byte red, byte green, byte blue, byte hue, byte saturation, byte value) {
     String page = String("") + 
         "<body>" +
             "<a href=\"/turnoff/\">Turn off</a>" + 
             "<a href=\"/whole/\">Whole color</a>" + 
             "<a href=\"/rainbow/\">Rainbowshit</a>" +
-            "<a href=\"/comets/\">Comets</a>" + 
+            "<a href=\"/comets/\">Shit (comets)</a>" + 
+            "<a href=\"/colorwipe/\">Wipe your life</a>" +
             // "<a href=\"/meteor\">Meteor to Earth</a>" +
             // "<a href=\"/cyclon\">Cyclon</a>" +
             // // "<a href=\"/balls\">Balls, My Balls</a>" +
@@ -129,7 +130,6 @@ String main_page(byte brightness, byte colorsheme, int mass, byte red, byte gree
             // "<a href=\"/twinkle\">Twinkle</a>" +
             // "<a href=\"/runninglights\">Run The Light</a>" +
             // "<a href=\"/sparkle\">Sparkles MAAAN</a>" +
-            // "<a href=\"/wipe\">Wipe your life</a>" +
             
             "<form action=\"/\" method=\"GET\">" +
                 "<p>" +
@@ -150,6 +150,15 @@ String main_page(byte brightness, byte colorsheme, int mass, byte red, byte gree
                         "style=\"{max-width: 300px;}\">" +
                 "</p>" +
                 "<hr>" +
+                // "<p>" +
+                //     "<label for=\"comets_length\">Comets length</label>" +
+                //     "<input type=\"number\"" +
+                //         "id=\"comets_length\"" +
+                //         "name=\"comets_length\"" +
+                //         "value=\"" + String(comets_length) + "\" " +
+                //         "style=\"{max-width: 300px;}\">" +
+                // "</p>" +
+                // "<hr>" +
                 "<p>" +
                     "<label for=\"colorsheme\">Colorsheme</label>" +
                     "<select id=\"colorsheme\" name=\"colorsheme\">" +

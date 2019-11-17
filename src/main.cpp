@@ -12,7 +12,7 @@
 
 
 // LED settings
-int effect = 0;
+int effect = 1;
 
 // extern byte brightness;
 // extern byte colorsheme;
@@ -24,13 +24,16 @@ int effect = 0;
 // extern int comets_length;
 
 // WiFi settings
-const char ssid[] = "TPL";
-const char pass[] = "13096472";
+const char ssid[] = "Pautina_100";
+const char pass[] = "03294424";
+
+const char ssid2[] = "4LED";
+const char pass2[] = "thereisnospoon";
 
 // SoftAP settings
 bool soft_ap = false;
-const char soft_ssid[] = "Mesh";
-const char soft_pass[] = "mesh";
+const char soft_ssid[] = "bath";
+const char soft_pass[] = "";
 
 // Init server
 ESP8266WebServer server(80);
@@ -44,6 +47,7 @@ void handleTurnOff();
 void handleRainbow();
 void handleWholeColor();
 void handleComets();
+void handleColorWipe();
 
 
 // Run on setup/load
@@ -59,12 +63,27 @@ void setup() {
     Serial.print(".");
     delay(500);
     connection_time_conter++;
-    if (connection_time_conter > 60) {
+    if (connection_time_conter > 30) {
       Serial.println();
       Serial.print("Cannot connect to the ");
       Serial.println(ssid);
-      startSoftAP();
-      while (true) {;}
+      WiFi.begin(ssid2, pass2);
+      Serial.print("Connection to ");
+      Serial.print(ssid2);
+      int connection_time_conter2 = 0;
+      while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(500);
+        connection_time_conter2++;
+        if (connection_time_conter2 > 60) {
+          Serial.println();
+          Serial.print("Cannot connect to the ");
+          Serial.println(ssid2);
+          soft_ap = true;
+          break;
+        }
+      }
+      break;
     }
   }
   Serial.print("\nConnected. IP - ");
@@ -82,6 +101,7 @@ void setup() {
   server.on("/whole/", handleWholeColor);
   server.on("/rainbow/", handleRainbow);
   server.on("/comets/", handleComets);
+  server.on("/colorwipe/", handleColorWipe);
 
   // Handle API requests
   server.on("/api/", handleAPIRoot);
@@ -166,6 +186,18 @@ void runFuckingLights() {
       comets();
       break;
     }
+    case 4: {
+      colorWipe();
+      break;
+    }
+    case 5: {
+      fire();
+      break;
+    }
+    case 6: {
+      runningLights();
+      break;
+    }
   }
 }
 
@@ -191,6 +223,9 @@ void handleRoot() {
       if (name == "mass") {
         mass = value.toInt();
       }
+      // if (name = "comets_length") {
+      //   comets_length = value.toInt();
+      // }
       if (name == "colorsheme") {
         colorsheme = value.toInt();
       }
@@ -214,7 +249,7 @@ void handleRoot() {
       }
     }
   }
-  server.send(200, "text/html", main_page(brightness, colorsheme, mass, rgb_scheme.red, rgb_scheme.green, rgb_scheme.blue, hsv_scheme.hue, hsv_scheme.saturation, hsv_scheme.value));
+  server.send(200, "text/html", main_page(brightness, colorsheme, mass, comets_length, rgb_scheme.red, rgb_scheme.green, rgb_scheme.blue, hsv_scheme.hue, hsv_scheme.saturation, hsv_scheme.value));
 }
 
 // Handle effects
@@ -235,5 +270,10 @@ void handleRainbow() {
 
 void handleComets() {
   effect = 3;
+  server.send(200, "text/html", redirect_to_main( WiFi.localIP().toString() ));
+}
+
+void handleColorWipe() {
+  effect = 4;
   server.send(200, "text/html", redirect_to_main( WiFi.localIP().toString() ));
 }
